@@ -24,24 +24,28 @@ epochs = 5 #was originally 15. after using .2 of dataset for validation, converg
 IMG_HEIGHT = 150
 IMG_WIDTH = 150
 class_mode = 'categorical'
-classes = ["00", "01", "02"]
+#classes = ["00", "01", "02"]
 validation_split = 0.2
 
-image_generator = ImageDataGenerator(rescale=1./255, validation_split=validation_split)
-train_data_gen = image_generator.flow_from_directory(batch_size=batch_size,
-                                                           directory=train_dir,
-                                                           shuffle=True,
-                                                           target_size=(IMG_HEIGHT, IMG_WIDTH),
-                                                           class_mode=class_mode,
-                                                           classes=classes,
-                                                           subset='training')
+image_generator = ImageDataGenerator(
+    rescale=1./255,
+    validation_split=validation_split)
+train_data_gen = image_generator.flow_from_directory(
+    batch_size=batch_size,
+    directory=train_dir,
+    shuffle=True,
+    target_size=(IMG_HEIGHT, IMG_WIDTH),
+    class_mode=class_mode,
+    #classes=classes,
+    subset='training')
 
-val_data_gen = image_generator.flow_from_directory(batch_size=batch_size,
-                                                           directory=train_dir,
-                                                           target_size=(IMG_HEIGHT, IMG_WIDTH),
-                                                           class_mode=class_mode,
-                                                           classes=classes,
-                                                           subset='validation')
+val_data_gen = image_generator.flow_from_directory(
+    batch_size=batch_size,
+    directory=train_dir,
+    target_size=(IMG_HEIGHT, IMG_WIDTH),
+    class_mode=class_mode,
+    #classes=classes,
+    subset='validation')
 
 steps_per_epoch = train_data_gen.samples // batch_size
 validation_steps_per_epoch = val_data_gen.samples // batch_size
@@ -93,28 +97,30 @@ plt.title('Training and Validation Loss')
 plt.show()
 
 augmented_image_generator = ImageDataGenerator(
-                    rescale=1./255,
-                    rotation_range=45,
-                    width_shift_range=.15,
-                    height_shift_range=.15,
-                    horizontal_flip=True,
-                    zoom_range=0.5,
-                    validation_split=validation_split)
+    rescale=1./255,
+    rotation_range=45,
+    width_shift_range=.15,
+    height_shift_range=.15,
+    horizontal_flip=True,
+    zoom_range=0.5,
+    validation_split=validation_split)
 
-train_data_gen = augmented_image_generator.flow_from_directory(batch_size=batch_size,
-                                                     directory=train_dir,
-                                                     shuffle=True,
-                                                     target_size=(IMG_HEIGHT, IMG_WIDTH),
-                                                     class_mode=class_mode,
-                                                     classes=classes,
-                                                     subset='training')
+train_data_gen = augmented_image_generator.flow_from_directory(
+    batch_size=batch_size,
+    directory=train_dir,
+    shuffle=True,
+    target_size=(IMG_HEIGHT, IMG_WIDTH),
+    class_mode=class_mode,
+    #classes=classes,
+    subset='training')
 
-val_data_gen = augmented_image_generator.flow_from_directory(batch_size=batch_size,
-                                                 directory=train_dir,
-                                                 target_size=(IMG_HEIGHT, IMG_WIDTH),
-                                                 class_mode=class_mode,
-                                                 classes=classes,
-                                                 subset='validation')
+val_data_gen = augmented_image_generator.flow_from_directory(
+    batch_size=batch_size,
+    directory=train_dir,
+    target_size=(IMG_HEIGHT, IMG_WIDTH),
+    class_mode=class_mode,
+    #classes=classes,
+    subset='validation')
 
 model_new = Sequential([
     Conv2D(16, 3, padding='same', activation='relu',
@@ -132,8 +138,8 @@ model_new = Sequential([
 ])
 
 model_new.compile(optimizer='adam',
-                  loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
-                  metrics=['accuracy'])
+    loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+    metrics=['accuracy'])
 
 model_new.summary()
 
@@ -144,6 +150,8 @@ history = model_new.fit_generator(
     validation_data=val_data_gen,
     validation_steps=validation_steps_per_epoch
 )
+
+model_new.save('all_categories_all_augs.h5')
 
 acc = history.history['accuracy']
 val_acc = history.history['val_accuracy']
@@ -165,4 +173,31 @@ plt.plot(epochs_range, loss, label='Training Loss')
 plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
+plt.show()
+
+validation_image_batch, validation_label_batch = next(iter(val_data_gen))
+true_label_ids = np.argmax(validation_label_batch,axis=-1)
+print("Validation batch shape:", validation_image_batch.shape)
+
+dataset_labels = sorted(
+    train_data_gen.class_indices.items(),
+    key=lambda pair:pair[1])
+dataset_labels = np.array([key.title() for key, value in dataset_labels])
+print(dataset_labels)
+
+tf_model_predictions = model_new.predict(validation_image_batch)
+print("Prediction results shape:", tf_model_predictions.shape)
+
+predicted_ids = np.argmax(tf_model_predictions, axis=-1)
+predicted_labels = dataset_labels[predicted_ids]
+print("Predicted labels:", predicted_labels)
+
+plt.figure(figsize=(10,10))
+plt.subplots_adjust(hspace=0.5)
+for n in range(30): #(len(predicted_labels)-2)
+  plt.subplot(6,5,n+1)
+  plt.imshow(validation_image_batch[n])
+  color = "green" if predicted_ids[n] == true_label_ids[n] else "red"
+  plt.title(predicted_labels[n].title(), color=color)
+  #plt.axis('off') = plt.suptitle("Model predictions")
 plt.show()

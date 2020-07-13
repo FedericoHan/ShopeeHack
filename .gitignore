@@ -3,3 +3,24 @@ competition 1/src/__pycache__/parse_data.cpython-38.pyc
 competition 1/.DS_Store
 competition 1/src/.DS_Store
 .DS_Store
+competition 2/all_categories_all_augs.h5
+competition 2/all_categories_all_augs.h5.bad
+competition 2/all_categories_results.txt
+competition 2/Copy_of_transfer_learning_with_hub.ipynb
+competition 2/copy_of_transfer_learning_with_hub.py
+competition 2/imagenet_resnet_v2_50_classification_4.tar.gz
+competition 2/imagenet_resnet_v2_50_feature_vector_4.tar.gz
+competition 2/load_model_only.py
+competition 2/output.txt
+competition 2/results.csv
+competition 2/saved_model.pb
+competition 2/saved_model_1.pb
+competition 2/submission.csv
+competition 2/tf_tutorial_classification_local_runtime.py
+competition 2/transfer_learning_with_hub.py
+competition 2/versions.py
+competition 2/tf_tutorial_classification_local_runtime.py
+competition 2/tf_tutorial_classification_local_runtime.py
+competition 3/Judging_Servers.py
+competition 3/Lucky_Winner.py
+competition 3/Search_Engine.py
